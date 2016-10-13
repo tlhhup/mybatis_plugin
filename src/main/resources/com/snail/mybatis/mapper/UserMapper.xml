@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.snail.mybatis.mapper.UserMapper">
+    
+    <select id="findEntity" parameterType="user" resultType="user">
+        select * from users
+        <where>
+            <if test="userName!=null and userName!=''">
+                userName=#{userName}
+            </if>
+            <if test="password!=null and password!=''">
+                and password=#{password}
+            </if>
+        </where>
+    </select>
+    
+    <select id="findUserInfo" parameterType="user" resultType="user">
+        select * from users
+        <where>
+            <if test="id!=0">
+                id=#{id}
+            </if>
+        </where>
+    </select>
+    
+    <delete id="deleteUserInfoById" parameterType="int">
+        delete from users where id=#{c}
+    </delete>
+    
+    <update id="updateEntity" parameterType="user">
+        update users
+        <set>
+            <if test="userName!=null and userName!=''">
+                userName=#{userName},
+            </if>
+            <if test="photo!=null and photo!=''">
+                photo=#{photo},
+            </if>
+        </set>
+        <where>
+            id=#{id}
+        </where>
+    </update>
+    
+</mapper>
