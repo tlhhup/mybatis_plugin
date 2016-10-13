@@ -136,6 +136,23 @@
 				    }
 				    return target;
 				  }
+				  //插件中的plugin方法
+				  public Object plugin(Object target) {
+					return Plugin.wrap(target, this);
+				  }
+				   public static Object wrap(Object target, Interceptor interceptor) {
+				    Map<Class<?>, Set<Method>> signatureMap = getSignatureMap(interceptor);
+				    Class<?> type = target.getClass();
+				    Class<?>[] interfaces = getAllInterfaces(type, signatureMap);
+				    if (interfaces.length > 0) {
+					  //返回代理对象
+				      return Proxy.newProxyInstance(
+				          type.getClassLoader(),
+				          interfaces,
+				          new Plugin(target, interceptor, signatureMap));
+				    }
+				    return target;
+				  }
 				 // 到此StatementHandler的代理对象就创建完毕
 				
 				//2
@@ -143,7 +160,48 @@
 				  private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
 				    Statement stmt;
 				    Connection connection = getConnection(statementLog);
+				    //此时的handler为代理对象
 				    stmt = handler.prepare(connection, transaction.getTimeout());
 				    handler.parameterize(stmt);
 				    return stmt;
 				  }
+               	// 调用Plugin的invoke方法
+				  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+				    try {
+				      Set<Method> methods = signatureMap.get(method.getDeclaringClass());
+					  //具有插件及有需要拦截的方法-->触发插件中的方法(修改sql语句)
+				      if (methods != null && methods.contains(method)) {
+						// 传入了拦截的方法、参数、代理对象
+				        return interceptor.intercept(new Invocation(target, method, args));
+				      }
+				      return method.invoke(target, args);
+				    } catch (Exception e) {
+				      throw ExceptionUtil.unwrapThrowable(e);
+				    }
+				  }
+			    //下面看interceptor中的方法
+				public Object intercept(Invocation invocation) throws Throwable {
+					//取出拦截对象
+					StatementHandler handler=(StatementHandler) invocation.getTarget();
+					MetaObject metaObject = SystemMetaObject.forObject(handler);
+					//分离代理对象链
+					while(metaObject.hasGetter("h")){
+						Object object = metaObject.getValue("h");
+						metaObject=SystemMetaObject.forObject(object);
+					}
+					//得到原始对象(及第一次插件在产生代理的时候Plugin中target存放的是最原始的对象)
+					while(metaObject.hasGetter("target")){
+						Object object = metaObject.getValue("target");
+						metaObject=SystemMetaObject.forObject(object);
+					}
+					String sql=(String) metaObject.getValue("delegate.boundSql.sql");
+					System.out.println("执行的sql语句为："+sql);
+					//继续往下面执行-->该方法相当重要
+					return invocation.proceed();
+				}
+				// 调用invocation的proceed方法-->有它来执行目标对象执行的方法
+				  public Object proceed() throws InvocationTargetException, IllegalAccessException {
+					// 值得赋值时在创建intercept方法参数是已经封装好了--->将一层层返回最后调用目标对象的方法
+				    return method.invoke(target, args);
+				  }
+				// 到此Mapper的一个执行流程完毕
