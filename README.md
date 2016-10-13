@@ -3,8 +3,16 @@
 
 1. Mapper代理开发执行流程
 	1. 四大对象
-		1. Executor：调度StatementHandler、ParameterHandler、ResultHandler等来执行对应的SQL
+		1. Executor：调度StatementHandler、ParameterHandler、ResultHandler等来执行对应的SQL,通过mybatis的配置文件中的defaultExecutorType进行设置
+			1. simple：默认执行器(SimpleExecutor)
+			2. reuse：一种执行器重用预处理语句
+			3. batch：执行器重用语句和批量更新，它是针对批量专用的执行器
 		2. StatementHandler：使用数据库的Statement(PreparedStatement)执行操作
+			1. RoutingStatementHandler：一个路由
+			2. BaseStatementHandler：
+				1. CallableStatementHandler：支持存储过程
+				2. PreparedStatementHandler：
+				3. SimpleStatementHandler：默认
 		3. ParameterHandler：用户SQL对参数的处理
 		4. ResultHandler：进行最后结果集的封装返回处理
 	5. 执行流程
