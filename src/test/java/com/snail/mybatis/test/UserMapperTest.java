@@ -29,7 +29,10 @@ public class UserMapperTest {
 			session = sqlSessionFactory.openSession();
 			
 			UserMapper userMapper = session.getMapper(UserMapper.class);
-			List<User> users = userMapper.findEntity(null);
+			User user=new User();
+			user.setPage(1);
+			user.setPageSize(10);
+			List<User> users = userMapper.findEntity(user);
 			System.out.println(users.size());
 			//提交事务
 			session.commit();

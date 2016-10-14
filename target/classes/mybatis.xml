@@ -11,6 +11,13 @@
     </typeAliases>
     
     <plugins>
+        <plugin interceptor="com.snail.mybatis.plugin.PageHelper">
+            <!-- 设置默认参数 -->
+            <property name="page" value="1"/>
+            <property name="pageSize" value="10"/>
+            <property name="useFlag" value="true"/>
+            <property name="checkFlag" value="true"/>
+        </plugin>
         <plugin interceptor="com.snail.mybatis.plugin.TestPlugin">
             
         </plugin>

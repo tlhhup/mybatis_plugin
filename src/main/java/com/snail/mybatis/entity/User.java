@@ -3,7 +3,7 @@ package com.snail.mybatis.entity;
 import java.io.Serializable;
 import java.util.Date;
 
-public class User implements Serializable {
+public class User extends PageParams implements Serializable{
 	private static final long serialVersionUID = 1L;
 
 	private int id;// ` int(11) NOT NULL AUTO_INCREMENT,
