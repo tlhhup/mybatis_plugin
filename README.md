@@ -8,13 +8,21 @@
 			2. reuse：一种执行器重用预处理语句
 			3. batch：执行器重用语句和批量更新，它是针对批量专用的执行器
 		2. StatementHandler：使用数据库的Statement(PreparedStatement)执行操作
-			1. RoutingStatementHandler：一个路由
+			1. RoutingStatementHandler：一个路由，delegate存储最终得到的StatementHandler对象
 			2. BaseStatementHandler：
-				1. CallableStatementHandler：支持存储过程
-				2. PreparedStatementHandler：
-				3. SimpleStatementHandler：默认
-		3. ParameterHandler：用户SQL对参数的处理
-		4. ResultHandler：进行最后结果集的封装返回处理
+				1. CallableStatementHandler：采用的是java.sql中的CallableStatement(支持存储过程)
+				2. PreparedStatementHandler：采用的是java.sql中的PreparedStatement
+				3. SimpleStatementHandler：采用的是java.sql中Statement处理(默认)
+		3. ParameterHandler：用户SQL对参数的处理(默认实现类：DefaultParameterHandler)
+		4. ResultHandler：进行最后结果集的封装返回处理(默认实现类：DefaultResultHandler)
+	5. 工具类
+		1. MetaObject：可以有效的读取或者修改一些重要对象的属性
+			1. forObject：用于包装对象，但不再使用，使用**SystemMetaObject.forObject方法取代**
+			2. getValue：获取对象中指定属性的值，支持OGNL
+			3. setValue：修改对象的属性，支持OGNL
+			4. hasSetter\hasGetter：判断对象是否具有指定属性的get或set方法
+		2. Plugin：
+			1. wrap：静态方法，用户在插件中使用该方法来方法代理对象
 	5. 执行流程
 		1. 代理的创建
 			
@@ -212,4 +220,13 @@
 					// 值得赋值时在创建intercept方法参数是已经封装好了--->将一层层返回最后调用目标对象的方法
 				    return method.invoke(target, args);
 				  }
-				// 到此Mapper的一个执行流程完毕
+				// 到此Mapper的一个执行流程完毕	
+3. 插件开发流程
+	1. 确定需要拦截的对象(四大对象)：StatementHandler为最常用的拦截对象
+	2. 去顶拦截的方法和参数
+	3. 实现拦截方法
+4. 总结
+	1. 从以上的执行流程可以看出，加入的插件是对StatementHandler的prepare方法进行拦截，故在newStatementHandler方法的时候先生成的目录对象是一个**RoutingStatementHandler**类型的
+	2. **RoutingStatementHandler中的delegate属性**是对最终得到的StatementHandler对象的存储属性
+	3. **在StatementHandler中的BoundSql属性**存放执行的sql语句和所有的参数
+	4. **invocation中的proceed方法**必须在插件中继续调用，否则将改变mybatis的底层实现
