@@ -225,6 +225,61 @@
 	1. 确定需要拦截的对象(四大对象)：StatementHandler为最常用的拦截对象
 	2. 去顶拦截的方法和参数
 	3. 实现拦截方法
+		1. 编写插件实现Interceptor接口
+		2. 添加注解指定拦截对象、方法及参数
+
+				@Intercepts({ @Signature(type = StatementHandler.class, method = "prepare", args = { Connection.class ,Integer.class}) })
+				public class QueryLimitPlugin implements Interceptor {
+				 ....
+				}
+		3. 实现拦截方法
+			
+				//改变执行的sql语句
+				public Object intercept(Invocation invocation) throws Throwable {
+					//取出拦截对象
+					StatementHandler handler=(StatementHandler) invocation.getTarget();
+					MetaObject metaObject = SystemMetaObject.forObject(handler);
+					//分离代理对象代理链
+					while(metaObject.hasGetter("h")){
+						Object object = metaObject.getValue("h");
+						metaObject=SystemMetaObject.forObject(object);
+					}
+					//取出最后的代理对象及原始的四大对象
+					while(metaObject.hasGetter("target")){
+						Object object = metaObject.getValue("target");
+						metaObject=SystemMetaObject.forObject(object);
+					}
+					// 获取指定的sql语句
+					String sql=(String) metaObject.getValue("delegate.boundSql.sql");
+					System.out.println("执行的sql语句为："+sql);
+					return invocation.proceed();
+				}
+			
+				//返回代理对象
+				public Object plugin(Object target) {
+					return Plugin.wrap(target, this);
+				}
+			
+				//获取mybatis中配置的插件的属性
+				public void setProperties(Properties properties) {
+					if(properties!=null){
+						this.limit=Integer.parseInt(properties.getProperty("limit"));
+						this.dbType=properties.getProperty("dbType");
+					}
+				}
+		4. 配置mybatis的配置文件
+
+				<plugins>
+			        <plugin interceptor="com.snail.mybatis.plugin.TestPlugin">
+			            
+			        </plugin>
+			        <plugin interceptor="com.snail.mybatis.plugin.QueryLimitPlugin">
+			            <!-- 设置属性 -->
+						<property name="limit" value="50"/>
+			            <property name="dbType" value="mysql"/>
+			        </plugin>
+			    </plugins>
+
 4. 总结
 	1. 从以上的执行流程可以看出，加入的插件是对StatementHandler的prepare方法进行拦截，故在newStatementHandler方法的时候先生成的目录对象是一个**RoutingStatementHandler**类型的
 	2. **RoutingStatementHandler中的delegate属性**是对最终得到的StatementHandler对象的存储属性
