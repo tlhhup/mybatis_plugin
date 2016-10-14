@@ -43,4 +43,9 @@
         </where>
     </update>
     
+    <!-- 调用存储过程 -->
+    <select id="callGetUserCount" parameterType="callable" statementType="CALLABLE">
+        CALL countUsers(#{count,mode=OUT,jdbcType=INTEGER});
+    </select>
+    
 </mapper>

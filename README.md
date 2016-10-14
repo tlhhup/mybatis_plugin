@@ -279,7 +279,55 @@
 			            <property name="dbType" value="mysql"/>
 			        </plugin>
 			    </plugins>
+5. 调用存储过程
+	1. 编写接口方法
 
+			/**
+			 * 调用存储过程
+			 * @param result 用于接收存储过程的输出参数  只能通过包装类来存储数据
+			 */
+			void callGetUserCount(Callable result);
+	2. 编写映射文件
+
+			<!-- 调用存储过程 -->
+		    <select id="callGetUserCount" parameterType="callable" statementType="CALLABLE">
+		        CALL countUsers(#{count,mode=OUT,jdbcType=INTEGER});
+		    </select>
+	3. 说明
+		1. 映射文件中的mode属性值在ParameterMode中定义的为枚举数据类型，jdbcType是在JdbcType中定义的也是枚举类型，**statementType必须指定**
+		2. 为啥只能通过实体对象来存储数据?
+
+			 	//最终调用的是CallableStatementHandler中的query方法，定义如下
+				  public <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException {
+				    CallableStatement cs = (CallableStatement) statement;
+				    cs.execute();
+					//为空，存储过程没有返回值
+				    List<E> resultList = resultSetHandler.<E>handleResultSets(cs);
+					//将数据进行绑定
+				    resultSetHandler.handleOutputParameters(cs);
+				    return resultList;
+				  }
+				//数据绑定
+				  public void handleOutputParameters(CallableStatement cs) throws SQLException {
+					//获取参数对象
+				    final Object parameterObject = parameterHandler.getParameterObject();
+					//得到包装类MetaObject
+				    final MetaObject metaParam = configuration.newMetaObject(parameterObject);
+					//获取参数映射
+				    final List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+				    for (int i = 0; i < parameterMappings.size(); i++) {
+				      final ParameterMapping parameterMapping = parameterMappings.get(i);
+				      if (parameterMapping.getMode() == ParameterMode.OUT || parameterMapping.getMode() == ParameterMode.INOUT) {
+				        if (ResultSet.class.equals(parameterMapping.getJavaType())) {
+				          handleRefCursorOutputParameter((ResultSet) cs.getObject(i + 1), parameterMapping, metaParam);
+				        } else {
+				          final TypeHandler<?> typeHandler = parameterMapping.getTypeHandler();
+						  //这个最重要：调用的是包装对象(MetaObject)的setValue方法对指定的属性进行赋值
+				          metaParam.setValue(parameterMapping.getProperty(), typeHandler.getResult(cs, i + 1));
+				        }
+				      }
+				    }
+				  }
 4. 总结
 	1. 从以上的执行流程可以看出，加入的插件是对StatementHandler的prepare方法进行拦截，故在newStatementHandler方法的时候先生成的目录对象是一个**RoutingStatementHandler**类型的
 	2. **RoutingStatementHandler中的delegate属性**是对最终得到的StatementHandler对象的存储属性
