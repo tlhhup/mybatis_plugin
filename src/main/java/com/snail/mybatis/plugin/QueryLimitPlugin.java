@@ -32,7 +32,16 @@ public class QueryLimitPlugin implements Interceptor {
 			Object object = metaObject.getValue("target");
 			metaObject=SystemMetaObject.forObject(object);
 		}
-		//处理该获取不到delegate属性,因为此处获取到的还是代理对象，并非是原始对象 故报错
+		//处理该获取不到delegate属性,因为此处获取到的还是代理对象，并非是原始对象 故报错 加上以下代码即可
+		/*while(metaObject.hasGetter("h")){
+			Object object = metaObject.getValue("h");
+			metaObject=SystemMetaObject.forObject(object);
+		}
+		//执行到该位置是获取到的target其实是TestPlugin生成的代理对象
+		while(metaObject.hasGetter("target")){
+			Object object = metaObject.getValue("target");
+			metaObject=SystemMetaObject.forObject(object);
+		}*/
 //		String sql=(String) metaObject.getValue("delegate.boundSql.sql");
 //		System.out.println("执行的sql语句为："+sql);
 		return invocation.proceed();

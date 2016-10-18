@@ -24,6 +24,7 @@ public class TestPlugin implements Interceptor {
 			Object object = metaObject.getValue("h");
 			metaObject = SystemMetaObject.forObject(object);
 		}
+		//此时获取的目标对象即为为原始对象
 		while (metaObject.hasGetter("target")) {
 			Object object = metaObject.getValue("target");
 			metaObject = SystemMetaObject.forObject(object);
