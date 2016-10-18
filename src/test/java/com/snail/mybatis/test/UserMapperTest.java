@@ -63,7 +63,7 @@ public class UserMapperTest {
 			UserMapper userMapper = session.getMapper(UserMapper.class);
 			User user=new User();
 			user.setId(2);
-			user.setUserName("zhangsan");
+			user.setUser_name("zhangsan");
 			userMapper.updateEntity(user);
 			//提交事务
 			session.commit();

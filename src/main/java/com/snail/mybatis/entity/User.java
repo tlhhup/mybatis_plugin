@@ -1,57 +1,64 @@
 package com.snail.mybatis.entity;
 
 import java.io.Serializable;
-import java.util.Date;
 
-public class User extends PageParams implements Serializable{
+public class User extends PageParams implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private int id;// ` int(11) NOT NULL AUTO_INCREMENT,
-	private String userName;// ` varchar(200) DEFAULT NULL,
-	private String realName;// ` varchar(200) DEFAULT NULL,
-	private Date birthday;// ` datetime DEFAULT NULL,
-	private String password;// ` varchar(64) DEFAULT NULL,
-	private String note;// ` varchar(500) DEFAULT NULL,
-	private String photo;// 用户头像-->图片在服务地址
+	private long id;// bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+	private String user_name;// varchar(60) NOT NULL COMMENT '用户名称',
+	private String cnname;// varchar(60) NOT NULL COMMENT '姓名',
+	private char sex;// tinyint(3) NOT NULL COMMENT '性别',
+	private String mobile;// varchar(20) NOT NULL COMMENT '手机号码',
+	private String email;// varchar(60) NOT NULL COMMENT '电子邮件',
+	private String note;// varchar(1024) DEFAULT NULL COMMENT '备注',
 
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 
-	public String getUserName() {
-		return userName;
+	public String getUser_name() {
+		return user_name;
 	}
 
-	public void setUserName(String userName) {
-		this.userName = userName;
+	public void setUser_name(String user_name) {
+		this.user_name = user_name;
 	}
 
-	public String getRealName() {
-		return realName;
+	public String getCnname() {
+		return cnname;
 	}
 
-	public void setRealName(String realName) {
-		this.realName = realName;
+	public void setCnname(String cnname) {
+		this.cnname = cnname;
 	}
 
-	public Date getBirthday() {
-		return birthday;
+	public char getSex() {
+		return sex;
 	}
 
-	public void setBirthday(Date birthday) {
-		this.birthday = birthday;
+	public void setSex(char sex) {
+		this.sex = sex;
 	}
 
-	public String getPassword() {
-		return password;
+	public String getMobile() {
+		return mobile;
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public String getNote() {
@@ -61,13 +68,4 @@ public class User extends PageParams implements Serializable{
 	public void setNote(String note) {
 		this.note = note;
 	}
-
-	public String getPhoto() {
-		return photo;
-	}
-
-	public void setPhoto(String photo) {
-		this.photo = photo;
-	}
-
 }

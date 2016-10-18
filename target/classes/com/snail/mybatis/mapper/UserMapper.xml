@@ -4,19 +4,16 @@
 <mapper namespace="com.snail.mybatis.mapper.UserMapper">
     
     <select id="findEntity" parameterType="user" resultType="user">
-        select * from users
+        select * from t_user
         <where>
-            <if test="userName!=null and userName!=''">
+            <if test="user_name!=null and user_name!=''">
                 userName=#{userName}
-            </if>
-            <if test="password!=null and password!=''">
-                and password=#{password}
             </if>
         </where>
     </select>
     
     <select id="findUserInfo" parameterType="user" resultType="user">
-        select * from users
+        select * from t_user
         <where>
             <if test="id!=0">
                 id=#{id}
@@ -25,17 +22,14 @@
     </select>
     
     <delete id="deleteUserInfoById" parameterType="int">
-        delete from users where id=#{c}
+        delete from t_user where id=#{c}
     </delete>
     
     <update id="updateEntity" parameterType="user">
-        update users
+        update t_user
         <set>
-            <if test="userName!=null and userName!=''">
+            <if test="user_name!=null and user_name!=''">
                 userName=#{userName},
-            </if>
-            <if test="photo!=null and photo!=''">
-                photo=#{photo},
             </if>
         </set>
         <where>
